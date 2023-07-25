@@ -3,10 +3,10 @@
 		<div class="header__wrapper">
 			<span class="header__info">Каталог</span>
 			<NuxtLink to="/" class="header__logo">
-				<img src="img/site-logo.webp" alt="Логотип Рик и Морти" width="116" height="34" />
+				<img src="@/img/site-logo.webp" alt="Логотип Рик и Морти" width="494" height="148" />
 			</NuxtLink>
 			<a class="header__tel" href="tel:8 800 600 90 09"> 8 800 600 90 09 </a>
-			<NuxtLink to="/cart" class="header__cart" href="cart.html" aria-label="Корзина с товарами">
+			<NuxtLink to="/" class="header__cart" aria-label="Корзина с товарами">
 				<svg width="19" height="24">
 					<use xlink:href="#icon-cart"></use>
 				</svg>

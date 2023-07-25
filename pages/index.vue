@@ -7,8 +7,6 @@
 			</div>
 		</div>
 
-		<!-- Pagination -->
-		<!-- <BasePagination @page-changed="changePage" :elem-count="countProducts" :per-page="productsPerPage" :page="page" :page-count="countPage" /> -->
 		<paginate
 			v-model="page"
 			:page-count="countPage"
@@ -22,17 +20,19 @@
 			:disabled-class="'pagination__link--disabled'">
 		</paginate>
 
-		<div v-if="productsLoading" class="loader">G</div>
+		<div v-if="productsLoading" class="loader">
+			<img src="@/assets/loader.gif" alt="" />
+		</div>
 		<div v-else class="content__catalog">
 			<!-- Catalog -->
 			<section class="catalog">
 				<ul class="catalog__list">
 					<li v-for="character of characters" class="catalog__item">
-						<a class="catalog__pic" href="#">
+						<NuxtLink :to="'/products/' + character.id" class="catalog__pic">
 							<img :src="character.image" :srcset="character.image" alt="Название товара" />
-						</a>
+						</NuxtLink>
 						<h3 class="catalog__title">
-							<a href="#"> {{ character.name }} </a>
+							{{ character.name }}
 						</h3>
 						<span class="catalog__price"> {{ character.status }} </span>
 					</li>
@@ -45,8 +45,10 @@
 <script setup lang="ts">
 	import { useItems } from '../.nuxt/composables/useItems';
 	import paginate from 'vuejs-paginate-next';
-	const route = useRoute();
 
+	// For NUXT Router
+	const route = useRoute();
+	const router = useRouter();
 	// For pagination
 	const page = ref(1);
 	const productsPerPage = ref(20);
@@ -81,12 +83,29 @@
 
 	const changePage = async (newPage: number) => {
 		const currentPage = route.params.id ? route.params.id : 1;
+		// console.log('route.params', route.params);
+		// route.params.id = newPage;
+		router.push({ query: { page: page.value } });
 		page.value = newPage;
 		loadItems(newPage);
 		// items.value = await useItems(newPage);
 		// console.log('CurrentPage:', currentPage);
 	};
 
+	// Watcher on router path changed
+	watch(
+		() => route.params,
+		async (newId) => {
+			console.log('Page Changed', newId);
+			page.value = route.query.page;
+			loadItems(route.query.page);
+		}
+	);
+
 	// Onload
-	loadItems(1);
+	if (route.query.page) {
+		loadItems(route.query.page);
+	} else {
+		loadItems(1);
+	}
 </script>
