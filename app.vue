@@ -7,8 +7,4 @@ import { NuxtLayout } from './.nuxt/components';
 	<TheFooter />
 </template>
 
-<script setup lang="ts">
-	const route = useRoute();
-
-	console.log(route);
-</script>
+<script setup lang="ts"></script>
