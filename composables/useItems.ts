@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-export const useItems = async (page: number) => {
+export const useItems = async (query: string | null) => {
 	const response = await axios
-		.get(`https://rickandmortyapi.com/api/character/?page=${page}`, {
+		.get(`https://rickandmortyapi.com/api/character/${query}`, {
 			validateStatus: function (status) {
 				return status < 500; // Разрешить, если код состояния меньше 500
 			},

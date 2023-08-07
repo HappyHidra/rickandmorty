@@ -8,11 +8,25 @@
 		</div>
 		<div class="error-loader">
 			{{ getFiltersList }}
-			<input v-model="inputVal" />
-			<button @click="addValueToFilterList(inputVal)">+</button>
+			<br />Page value: {{ getPage }} <br />Filtered Page value: {{ getFilteredPage }}
 		</div>
 		<paginate
-			v-model="page"
+			v-if="filtersActive"
+			v-model="getFilteredPage"
+			:page-count="countPage"
+			:click-handler="changeFilteredPage"
+			:prev-text="'<-'"
+			:next-text="'->'"
+			:container-class="'catalog__pagination pagination'"
+			:page-link-class="'pagination__link'"
+			:page-class="'pagination__item'"
+			:active-class="'pagination__link--current'"
+			:disabled-class="'pagination__link--disabled'"
+			:first-last-button="true">
+		</paginate>
+		<paginate
+			v-if="!filtersActive"
+			v-model="getPage"
 			:page-count="countPage"
 			:click-handler="changePage"
 			:prev-text="'<-'"
@@ -33,6 +47,8 @@
 			<NuxtLink to="/" class="breadcrumbs__link"> На главную </NuxtLink>
 		</div>
 		<div v-else class="content__catalog">
+			<!-- Filter -->
+			<BaseFilter @loadFilteredCharacters="addFilters" @clear-filters="removeFilters" />
 			<!-- Catalog -->
 			<section class="catalog">
 				<ul class="catalog__list">
@@ -56,29 +72,29 @@
 	import { useFiltersStore } from '@/stores/FilterStore';
 	import { storeToRefs } from 'pinia';
 	import type { Ref } from 'vue';
+	// import { useGlobalStore } from '../stores/GlobalStore';
 
-	// For Router
+	//========= For Router
 	const route = useRoute();
 	const router = useRouter();
 
-	// For store
+	//========= For stores
+	// filter store
 	const filtersStore = useFiltersStore();
-	const { addValueToFilterList } = filtersStore;
-	const { getFiltersList } = storeToRefs(filtersStore);
-	const inputVal = ref('');
-	// For Pagination
-	const page = ref(1);
-	// const productsPerPage = ref(20);
+	const { changeStoredFilters, changeStoredPage, changeStoredFilteredPage } = filtersStore;
+	const { getFiltersList, getPage, getFilteredPage } = storeToRefs(filtersStore);
 
-	// For items
+	// global store
+	// const globalStore = useGlobalStore();
+	// let { currentRoute } = globalStore;
+
+	//========= For Pagination
+	// const page = ref(1);
+
+	//========= For items
 	const error: Ref<null | Object> = ref(null);
 	let items = ref();
 	const productsLoading = ref(false);
-
-	// type Info = {
-	// 	count: number;
-	// 	pages: number;
-	// };
 
 	interface ItemsResponse {
 		info: Object;
@@ -86,21 +102,55 @@
 		error: Object;
 	}
 
-	// Items loader
-	const loadItems = async (page: number) => {
-		productsLoading.value = true;
+	// interface Filters {
+	// 	filterName: string;
+	// 	status: string;
+	// }
 
-		await useItems(page).then((resp: ItemsResponse) => {
+	// Filters
+	const addFilters = (filters: object) => {
+		// Добавить в хранилище
+		changeStoredFilters({ name: filters.filterName.value, status: filters.filterStatus.value });
+		changeStoredFilteredPage(1);
+		router.push({ query: { name: getFiltersList.value.name, status: getFiltersList.value.status, page: 1 } });
+	};
+
+	const removeFilters = () => {
+		changeStoredFilters({ name: '', status: '' });
+		changeStoredFilteredPage(1);
+		router.push({ query: { page: getPage.value } });
+	};
+
+	// Items loader
+	const loadItems = async (query: string) => {
+		productsLoading.value = true;
+		await useItems(query).then((resp: ItemsResponse) => {
 			if (resp.info) {
 				error.value = null;
 				items.value = resp;
-				productsLoading.value = false;
 			} else if (resp.error) {
 				error.value = resp.error;
-				productsLoading.value = false;
 			}
+			productsLoading.value = false;
 		});
 	};
+
+	// Computed
+	const makeQuery = computed(() => {
+		// 	// Развернуть из поисковой строки в строку для запроса
+		let query = '?';
+		for (const [key, value] of Object.entries(route.query)) {
+			query += `&${key}=${value}`;
+		}
+		return query;
+	});
+
+	const filtersActive = computed(() => {
+		if (route.query.name || route.query.status) {
+			return true;
+		}
+		return false;
+	});
 
 	const characters = computed(() => {
 		return items.value ? items.value.results : null;
@@ -110,34 +160,39 @@
 		return items.value ? items.value.info : null;
 	});
 
-	const countProducts = computed(() => {
-		return items.value ? items.value.info.count : 0;
-	});
-
 	const countPage = computed(() => {
 		return items.value ? items.value.info.pages : 0;
 	});
 
-	const changePage = async (newPage: number) => {
-		page.value = newPage;
-		router.push({ query: { page: page.value } });
+	// On page changed
+	const changePage = (newPage: number) => {
+		changeStoredPage(newPage);
+		router.push({ query: { page: getPage.value } });
 	};
 
-	// Watcher on router path changed
+	const changeFilteredPage = (newPage: number) => {
+		changeStoredFilteredPage(newPage);
+		router.push({ query: { page: getFilteredPage.value, name: getFiltersList.value.name, status: getFiltersList.value.status } });
+	};
+
+	// Watcher on router params changed
 	watch(
-		() => route.params,
-		async (newId) => {
-			page.value = Number(route.query.page);
-			loadItems(page.value);
+		() => route.query,
+		async (val) => {
+			if (filtersActive.value) {
+				changeStoredFilteredPage(Number(route.query.page));
+			} else changeStoredPage(Number(route.query.page));
+			loadItems(makeQuery.value);
 		}
 	);
 
-	// created
+	// On component create
 	if (route.query.page) {
-		page.value = Number(route.query.page);
-		loadItems(Number(route.query.page));
+		// page.value = Number(route.query.page);
+		changeStoredPage(Number(route.query.page));
+		loadItems(makeQuery.value);
 	} else {
-		page.value = 1;
-		loadItems(1);
+		changeStoredPage(1);
+		loadItems(`?page=${getPage.value}`);
 	}
 </script>

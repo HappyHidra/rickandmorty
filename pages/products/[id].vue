@@ -20,39 +20,18 @@
 				</li>
 			</ul>
 		</div>
-		<section v-if="!itemLoading && !error" class="item">
-			<div class="item__pics pics">
-				<div class="pics__wrapper">
-					<img width="570" height="570" :src="data?.image" :srcset="data?.image" alt="Персонаж" />
-				</div>
-			</div>
-
-			<div class="item__info">
-				<span class="item__code">Артикул: 150030</span>
-				<h2 class="item__title">{{ data?.name }} - {{ data?.status }}</h2>
-				<h2 class="item__title">Раса: {{ data?.species }} Пол: {{ data?.gender }}</h2>
-			</div>
-
-			<!-- <div class="item__desc">
-				<ul class="tabs">
-					<li class="tabs__item">
-						<a class="tabs__link tabs__link--current"> Информация о товаре </a>
-					</li>
-					<li class="tabs__item">
-						<a class="tabs__link" href="#"> Доставка и возврат </a>
-					</li>
-				</ul>
-			</div> -->
+		{{ smth }}
+		<section v-if="!itemLoading && !error">
+			<CharacterCard :data="data" v-model:text="smth" />
 		</section>
 	</main>
 </template>
 
 <script setup lang="ts">
 	import type { Ref } from 'vue';
+	import { Data } from '@/types/data';
 
 	const route = useRoute();
-
-	type Data = { species: string; name: string; gender: string; image: string; status: string };
 
 	interface Item {
 		error: Object;
@@ -64,9 +43,12 @@
 
 	const error: Ref<null | Object> = ref(null);
 
+	// v-model test
+	const smth = ref('Something here');
+
 	const loadItem = async () => {
 		itemLoading.value = true;
-		await useItem(route.params.id).then((resp: Item) => {
+		await useItem(Number(route.params.id)).then((resp: Item) => {
 			if (resp.error) {
 				error.value = resp.error;
 				itemLoading.value = false;
