@@ -24,7 +24,9 @@
 			</ul>
 		</div>
 	</article>
-	<NuxtLink to="/" class="breadcrumbs__link"> На главную </NuxtLink>
+	<div class="error-loader">
+		<NuxtLink to="/" class="button button--primary mainpage__link"> На главную </NuxtLink>
+	</div>
 </template>
 
 <script setup lang="ts">

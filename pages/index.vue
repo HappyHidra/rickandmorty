@@ -6,17 +6,13 @@
 				<span class="content__info"> {{ info ? info.count : 0 }} персонажа </span>
 			</div>
 		</div>
-		<div class="error-loader">
-			{{ getFiltersList }}
-			<br />Page value: {{ getPage }} <br />Filtered Page value: {{ getFilteredPage }}
-		</div>
 		<paginate
 			v-if="filtersActive"
-			v-model="getFilteredPage"
 			:page-count="countPage"
 			:click-handler="changeFilteredPage"
 			:prev-text="'<-'"
 			:next-text="'->'"
+			:page-range="7"
 			:container-class="'catalog__pagination pagination'"
 			:page-link-class="'pagination__link'"
 			:page-class="'pagination__item'"
@@ -26,11 +22,11 @@
 		</paginate>
 		<paginate
 			v-if="!filtersActive"
-			v-model="getPage"
 			:page-count="countPage"
 			:click-handler="changePage"
 			:prev-text="'<-'"
 			:next-text="'->'"
+			:page-range="7"
 			:container-class="'catalog__pagination pagination'"
 			:page-link-class="'pagination__link'"
 			:page-class="'pagination__item'"
@@ -44,11 +40,12 @@
 		</div>
 		<div v-if="error" class="error-loader">
 			{{ error }}
-			<NuxtLink to="/" class="breadcrumbs__link"> На главную </NuxtLink>
+			<NuxtLink to="/" class="button button--primary mainpage__link"> На главную </NuxtLink>
 		</div>
 		<div v-else class="content__catalog">
 			<!-- Filter -->
-			<BaseFilter @loadFilteredCharacters="addFilters" @clear-filters="removeFilters" />
+
+			<BaseFilter @load-filtered-characters="addFilters" @clear-filters="removeFilters" />
 			<!-- Catalog -->
 			<section class="catalog">
 				<ul class="catalog__list">
@@ -73,6 +70,7 @@
 	import { storeToRefs } from 'pinia';
 	import type { Ref } from 'vue';
 	// import { useGlobalStore } from '../stores/GlobalStore';
+	import { Filters } from '@/types/filters';
 
 	//========= For Router
 	const route = useRoute();
@@ -102,21 +100,20 @@
 		error: Object;
 	}
 
-	// interface Filters {
-	// 	filterName: string;
-	// 	status: string;
-	// }
+	interface filtersType {
+		[key: string]: any;
+	}
 
 	// Filters
-	const addFilters = (filters: object) => {
+	const addFilters = (filters: filtersType) => {
 		// Добавить в хранилище
-		changeStoredFilters({ name: filters.filterName.value, status: filters.filterStatus.value });
+		changeStoredFilters({ name: filters.name, status: filters.status, gender: filters.gender });
 		changeStoredFilteredPage(1);
-		router.push({ query: { name: getFiltersList.value.name, status: getFiltersList.value.status, page: 1 } });
+		router.push({ query: { name: getFiltersList.value.name, status: getFiltersList.value.status, gender: getFiltersList.value.gender, page: 1 } });
 	};
 
 	const removeFilters = () => {
-		changeStoredFilters({ name: '', status: '' });
+		changeStoredFilters({ name: '', status: '', gender: '' });
 		changeStoredFilteredPage(1);
 		router.push({ query: { page: getPage.value } });
 	};
@@ -167,6 +164,9 @@
 	// On page changed
 	const changePage = (newPage: number) => {
 		changeStoredPage(newPage);
+		// filtersStore.$patch((state) => {
+		// 	state.currentPage = newPage;
+		// });
 		router.push({ query: { page: getPage.value } });
 	};
 
@@ -188,7 +188,6 @@
 
 	// On component create
 	if (route.query.page) {
-		// page.value = Number(route.query.page);
 		changeStoredPage(Number(route.query.page));
 		loadItems(makeQuery.value);
 	} else {

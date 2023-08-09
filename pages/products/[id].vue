@@ -5,7 +5,7 @@
 		</div>
 		<div v-if="error" class="error-loader">
 			<div class="catalog__title">{{ error }}</div>
-			<NuxtLink to="/" class="breadcrumbs__link"> На главную </NuxtLink>
+			<NuxtLink to="/" class="button button--primary mainpage__link"> На главную </NuxtLink>
 		</div>
 		<div v-if="!itemLoading && !error" class="content__top">
 			<ul class="breadcrumbs">
@@ -20,7 +20,7 @@
 				</li>
 			</ul>
 		</div>
-		{{ smth }}
+		<!-- {{ smth }} -->
 		<section v-if="!itemLoading && !error">
 			<CharacterCard :data="data" v-model:text="smth" />
 		</section>
