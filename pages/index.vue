@@ -46,29 +46,11 @@
 			<!-- Filter -->
 			<aside class="">
 				<BaseFilter @load-filtered-characters="addFilters" @clear-filters="removeFilters" @filter-by-name="filterByName" :helpers="helpers" />
-				<LocationFilter @add-location-filter="addLocationFilter" @remove-location-filter="removeLocationFilter" @filter-by-name="filterByName" />
 			</aside>
 			<!-- Catalog -->
-			<section v-if="!locationFilterActive" class="catalog">
+			<section class="catalog">
 				<ul class="catalog__list">
 					<li v-for="character of characters" class="catalog__item">
-						<NuxtLink :to="'/products/' + character.id" class="catalog__pic">
-							<img :src="character.image" :srcset="character.image" alt="Изображение персонажа" />
-						</NuxtLink>
-						<h3 class="catalog__title">
-							{{ character.name }}
-						</h3>
-						<span class="catalog__price"> {{ character.status }} </span>
-					</li>
-				</ul>
-			</section>
-			<!-- Location catalog -->
-			<section v-if="locationFilterActive" class="catalog">
-				<ul class="catalog__list">
-					{{
-						locationItems.data.name
-					}}
-					<li v-for="character of locationCharacters" class="catalog__item">
 						<NuxtLink :to="'/products/' + character.id" class="catalog__pic">
 							<img :src="character.image" :srcset="character.image" alt="Изображение персонажа" />
 						</NuxtLink>
@@ -89,8 +71,7 @@
 	import { useGlobalStore } from '@/stores/GlobalStore';
 	import { storeToRefs } from 'pinia';
 	import type { Ref } from 'vue';
-	import axios from 'axios';
-	import { useAllCharacters, useLocation } from '@/composables/useItems';
+	import { useAllCharacters } from '@/composables/useItems';
 
 	//========= For Router
 	const route = useRoute();
@@ -99,8 +80,8 @@
 	//========= For stores
 	// filter store
 	const filtersStore = useFiltersStore();
-	const { changeStoredFilters, changeStoredPage, changeStoredFilteredPage, changeLocationFilter } = filtersStore;
-	const { getFiltersList, getPage, getFilteredPage, getLocationFilter } = storeToRefs(filtersStore);
+	const { changeStoredFilters, changeStoredPage, changeStoredFilteredPage } = filtersStore;
+	const { getFiltersList, getPage, getFilteredPage } = storeToRefs(filtersStore);
 
 	// global store
 	const globalStore = useGlobalStore();
@@ -113,7 +94,6 @@
 	//========= For items
 	const error: Ref<null | Object> = ref(null);
 	let items = ref();
-	let locationItems = ref();
 	const productsLoading = ref(false);
 
 	const helpers = ref([]);
@@ -142,20 +122,8 @@
 		});
 	};
 
-	const addLocationFilter = (filters: filtersType) => {
-		// Добавить в хранилище
-		changeLocationFilter(filters.location);
-		router.push({ query: { location: filters.location } });
-	};
-
 	const removeFilters = () => {
 		changeStoredFilters({ name: '', status: '', gender: '' });
-		changeStoredFilteredPage(1);
-		router.push({ query: { page: getPage.value } });
-	};
-
-	const removeLocationFilter = () => {
-		changeLocationFilter('');
 		changeStoredFilteredPage(1);
 		router.push({ query: { page: getPage.value } });
 	};
@@ -179,18 +147,6 @@
 		});
 	};
 
-	// Location loader
-	const loadLocation = async (query: string) => {
-		productsLoading.value = true;
-		await useLocation(query).then((resp: ItemsResponse) => {
-			if (resp) {
-				error.value = null;
-				locationItems.value = resp;
-				productsLoading.value = false;
-			} else productsLoading.value = false;
-		});
-	};
-
 	// Computed
 	const makeQuery = computed(() => {
 		// 	// Развернуть из поисковой строки в строку для запроса
@@ -208,31 +164,8 @@
 		return false;
 	});
 
-	const locationFilterActive = computed(() => {
-		if (route.query.location) {
-			return true;
-		}
-		return false;
-	});
-
 	const characters = computed(() => {
 		return items.value ? items.value.results : null;
-	});
-
-	const locationCharacters = computed(() => {
-		return locationItems
-			? locationItems.data.residents.reduce(async (acc, charLink) => {
-					const result = await axios
-						.get(`${charLink}`, {
-							validateStatus: function (status) {
-								return status < 500; // Разрешить, если код состояния меньше 500
-							},
-						})
-						.then((resp) => resp)
-						.catch((error) => error);
-					acc.push(result);
-			  }, [])
-			: null;
 	});
 
 	const info = computed(() => {
@@ -261,14 +194,10 @@
 	watch(
 		() => route.query,
 		async (val) => {
-			if (!route.query.location) {
-				if (filtersActive.value) {
-					changeStoredFilteredPage(Number(route.query.page));
-				} else changeStoredPage(Number(route.query.page));
-				loadItems(makeQuery.value);
-			} else {
-				loadLocation(`${getLocationFilter.value}`);
-			}
+			if (filtersActive.value) {
+				changeStoredFilteredPage(Number(route.query.page));
+			} else changeStoredPage(Number(route.query.page));
+			loadItems(makeQuery.value);
 		}
 	);
 

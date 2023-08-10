@@ -35,27 +35,3 @@ export const useAllCharacters = async () => {
 		.catch((error) => error);
 	return response;
 };
-
-export const useAllLocations = async () => {
-	const response = await axios
-		.get(`https://rickandmortyapi.com/api/location/`, {
-			validateStatus: function (status) {
-				return status < 500; // Разрешить, если код состояния меньше 500
-			},
-		})
-		.then((resp) => resp.data.results)
-		.catch((error) => error);
-	return response;
-};
-
-export const useLocation = async (query: string | null) => {
-	const response = await axios
-		.get(`https://rickandmortyapi.com/api/location/${query}`, {
-			validateStatus: function (status) {
-				return status < 500; // Разрешить, если код состояния меньше 500
-			},
-		})
-		.then((resp) => resp)
-		.catch((error) => error);
-	return response;
-};
