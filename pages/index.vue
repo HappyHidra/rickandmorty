@@ -44,14 +44,33 @@
 		</div>
 		<div v-else class="content__catalog">
 			<!-- Filter -->
-
-			<BaseFilter @load-filtered-characters="addFilters" @clear-filters="removeFilters" />
+			<aside class="">
+				<BaseFilter @load-filtered-characters="addFilters" @clear-filters="removeFilters" @filter-by-name="filterByName" :helpers="helpers" />
+				<LocationFilter @add-location-filter="addLocationFilter" @remove-location-filter="removeLocationFilter" @filter-by-name="filterByName" />
+			</aside>
 			<!-- Catalog -->
-			<section class="catalog">
+			<section v-if="!locationFilterActive" class="catalog">
 				<ul class="catalog__list">
 					<li v-for="character of characters" class="catalog__item">
 						<NuxtLink :to="'/products/' + character.id" class="catalog__pic">
-							<img :src="character.image" :srcset="character.image" alt="Название товара" />
+							<img :src="character.image" :srcset="character.image" alt="Изображение персонажа" />
+						</NuxtLink>
+						<h3 class="catalog__title">
+							{{ character.name }}
+						</h3>
+						<span class="catalog__price"> {{ character.status }} </span>
+					</li>
+				</ul>
+			</section>
+			<!-- Location catalog -->
+			<section v-if="locationFilterActive" class="catalog">
+				<ul class="catalog__list">
+					{{
+						locationItems.data.name
+					}}
+					<li v-for="character of locationCharacters" class="catalog__item">
+						<NuxtLink :to="'/products/' + character.id" class="catalog__pic">
+							<img :src="character.image" :srcset="character.image" alt="Изображение персонажа" />
 						</NuxtLink>
 						<h3 class="catalog__title">
 							{{ character.name }}
@@ -67,10 +86,11 @@
 <script setup lang="ts">
 	import paginate from 'vuejs-paginate-next';
 	import { useFiltersStore } from '@/stores/FilterStore';
+	import { useGlobalStore } from '@/stores/GlobalStore';
 	import { storeToRefs } from 'pinia';
 	import type { Ref } from 'vue';
-	// import { useGlobalStore } from '../stores/GlobalStore';
-	import { Filters } from '@/types/filters';
+	import axios from 'axios';
+	import { useAllCharacters, useLocation } from '@/composables/useItems';
 
 	//========= For Router
 	const route = useRoute();
@@ -79,11 +99,12 @@
 	//========= For stores
 	// filter store
 	const filtersStore = useFiltersStore();
-	const { changeStoredFilters, changeStoredPage, changeStoredFilteredPage } = filtersStore;
-	const { getFiltersList, getPage, getFilteredPage } = storeToRefs(filtersStore);
+	const { changeStoredFilters, changeStoredPage, changeStoredFilteredPage, changeLocationFilter } = filtersStore;
+	const { getFiltersList, getPage, getFilteredPage, getLocationFilter } = storeToRefs(filtersStore);
 
 	// global store
-	// const globalStore = useGlobalStore();
+	const globalStore = useGlobalStore();
+	let { charactersNames } = globalStore;
 	// let { currentRoute } = globalStore;
 
 	//========= For Pagination
@@ -92,16 +113,23 @@
 	//========= For items
 	const error: Ref<null | Object> = ref(null);
 	let items = ref();
+	let locationItems = ref();
 	const productsLoading = ref(false);
+
+	const helpers = ref([]);
 
 	interface ItemsResponse {
 		info: Object;
-		results: Object;
+		results: [];
 		error: Object;
 	}
 
 	interface filtersType {
-		[key: string]: any;
+		[key: string]: string;
+	}
+
+	interface GenericBox<Type> {
+		[key: string]: Type;
 	}
 
 	// Filters
@@ -109,7 +137,15 @@
 		// Добавить в хранилище
 		changeStoredFilters({ name: filters.name, status: filters.status, gender: filters.gender });
 		changeStoredFilteredPage(1);
-		router.push({ query: { name: getFiltersList.value.name, status: getFiltersList.value.status, gender: getFiltersList.value.gender, page: 1 } });
+		router.push({
+			query: { name: getFiltersList.value.name, status: getFiltersList.value.status, gender: getFiltersList.value.gender, page: 1 },
+		});
+	};
+
+	const addLocationFilter = (filters: filtersType) => {
+		// Добавить в хранилище
+		changeLocationFilter(filters.location);
+		router.push({ query: { location: filters.location } });
 	};
 
 	const removeFilters = () => {
@@ -118,6 +154,19 @@
 		router.push({ query: { page: getPage.value } });
 	};
 
+	const removeLocationFilter = () => {
+		changeLocationFilter('');
+		changeStoredFilteredPage(1);
+		router.push({ query: { page: getPage.value } });
+	};
+
+	const filterByName = (currentName: string) => {
+		if (currentName.length < 1) {
+			helpers.value = [];
+		} else {
+			helpers.value = charactersNames.filter((name: string) => name.includes(currentName));
+		}
+	};
 	// Items loader
 	const loadItems = async (query: string) => {
 		productsLoading.value = true;
@@ -125,10 +174,20 @@
 			if (resp.info) {
 				error.value = null;
 				items.value = resp;
-			} else if (resp.error) {
-				error.value = resp.error;
-			}
-			productsLoading.value = false;
+				productsLoading.value = false;
+			} else productsLoading.value = false;
+		});
+	};
+
+	// Location loader
+	const loadLocation = async (query: string) => {
+		productsLoading.value = true;
+		await useLocation(query).then((resp: ItemsResponse) => {
+			if (resp) {
+				error.value = null;
+				locationItems.value = resp;
+				productsLoading.value = false;
+			} else productsLoading.value = false;
 		});
 	};
 
@@ -149,8 +208,31 @@
 		return false;
 	});
 
+	const locationFilterActive = computed(() => {
+		if (route.query.location) {
+			return true;
+		}
+		return false;
+	});
+
 	const characters = computed(() => {
 		return items.value ? items.value.results : null;
+	});
+
+	const locationCharacters = computed(() => {
+		return locationItems
+			? locationItems.data.residents.reduce(async (acc, charLink) => {
+					const result = await axios
+						.get(`${charLink}`, {
+							validateStatus: function (status) {
+								return status < 500; // Разрешить, если код состояния меньше 500
+							},
+						})
+						.then((resp) => resp)
+						.catch((error) => error);
+					acc.push(result);
+			  }, [])
+			: null;
 	});
 
 	const info = computed(() => {
@@ -179,10 +261,14 @@
 	watch(
 		() => route.query,
 		async (val) => {
-			if (filtersActive.value) {
-				changeStoredFilteredPage(Number(route.query.page));
-			} else changeStoredPage(Number(route.query.page));
-			loadItems(makeQuery.value);
+			if (!route.query.location) {
+				if (filtersActive.value) {
+					changeStoredFilteredPage(Number(route.query.page));
+				} else changeStoredPage(Number(route.query.page));
+				loadItems(makeQuery.value);
+			} else {
+				loadLocation(`${getLocationFilter.value}`);
+			}
 		}
 	);
 
@@ -193,5 +279,15 @@
 	} else {
 		changeStoredPage(1);
 		loadItems(`?page=${getPage.value}`);
+	}
+
+	// Loading all characters data
+	if (!charactersNames) {
+		await useAllCharacters().then((resp) => {
+			const charNames = resp.results.map((char: GenericBox<string>) => {
+				return char.name.toLowerCase();
+			});
+			charactersNames = charNames;
+		});
 	}
 </script>

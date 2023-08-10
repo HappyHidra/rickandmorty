@@ -1,12 +1,18 @@
 <template>
-	<aside class="">
+
 		<span class="content__info"> Найти персонажа: </span>
 		<form class="__form form" action="#" method="get" @submit.prevent="submit">
 			<!-- Name -->
 			<fieldset class="form__block">
 				<legend class="form__legend">Имя</legend>
-				<label class="form__label form__label--select">
-					<input class="form__select" name="category" v-model="currentFilters.name" />
+				<label class="form__label">
+					<input @input="inputName" class="form__select" name="category" v-model="currentFilters.name" />
+					<ul v-if="status" class="name__helpers">
+						<li @click.prevent="helperClick(helper)" v-for="helper of helpers" :key="helper">
+							{{ helper }}
+						</li>
+					</ul>
+					<div class="animation"></div>
 				</label>
 			</fieldset>
 			<!-- Status -->
@@ -23,18 +29,6 @@
 			<!-- Species -->
 			<!-- <fieldset class="form__block">
 				<legend class="form__legend">Раса</legend>
-				<label class="form__label form__label--select">
-					<select class="form__select" type="text" name="category" v-model.number="currentCategoryId">
-						<option value="0">Все категории</option>
-						<option :value="category.id" v-for="category of categories" :key="category.id">
-							{{ category.title }}
-						</option>
-					</select>
-				</label>
-			</fieldset> -->
-			<!-- Type -->
-			<!-- <fieldset class="form__block">
-				<legend class="form__legend">Тип</legend>
 				<label class="form__label form__label--select">
 					<select class="form__select" type="text" name="category" v-model.number="currentCategoryId">
 						<option value="0">Все категории</option>
@@ -61,19 +55,47 @@
 				<button class="__reset button button--primary" type="button" @click.prevent="reset">Сбросить</button>
 			</div>
 		</form>
-	</aside>
+	
 </template>
 
 <script setup lang="ts">
-	import { reactive } from 'vue';
+	import { ref, reactive } from 'vue';
+	import { useAllLocations } from '../composables/useItems';
+
+	const props = defineProps({
+		helpers: Array<string>,
+	});
 
 	const currentFilters = reactive({
 		name: '',
 		status: '',
 		gender: '',
+		location: '',
 	});
 
-	const emit = defineEmits(['loadFilteredCharacters', 'clearFilters']);
+	const status = ref(false);
+
+	const locations = await useAllLocations();
+
+	watch(
+		() => props.helpers,
+		() => {
+			if (props.helpers.length > 0) {
+				status.value = true;
+			}
+		}
+	);
+
+	const inputName = () => {
+		emit('filterByName', currentFilters.name);
+	};
+
+	const helperClick = (helper: string) => {
+		currentFilters.name = helper;
+		status.value = false;
+	};
+
+	const emit = defineEmits(['loadFilteredCharacters', 'clearFilters', 'filterByName']);
 
 	const submit = () => {
 		emit('loadFilteredCharacters', currentFilters);

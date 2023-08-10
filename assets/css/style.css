@@ -133,6 +133,7 @@ a {
 }
 .button--primary {
 	background-color: #15b0c7;
+	border-radius: 10px;
 	border: 0;
 	color: #fff;
 	font-size: 13px;
@@ -386,7 +387,7 @@ a {
 	font-family: 'Geometria', 'Arial', sans-serif;
 	font-size: 14px;
 	line-height: 1;
-	color: #737373;
+	/* color: #737373; */
 }
 .form__label {
 	position: relative;
@@ -417,7 +418,9 @@ a {
 	background-image: url(../img/svg/icon-arrow-bottom.svg);
 	background-repeat: no-repeat;
 	background-size: contain;
+	pointer-events: none;
 }
+
 .form__label--small::after {
 	right: 5px;
 }
@@ -997,7 +1000,7 @@ a {
 	background-color: #222;
 }
 .options__radio:checked ~ .options__value {
-	background-color: #e02d71;
+	background-color: var(--main-color);
 	color: #fff;
 }
 .options__radio:checked ~ .options__value::before {
@@ -1147,6 +1150,61 @@ a {
 	-ms-flex-item-align: stretch;
 	align-self: stretch;
 }
+:root {
+	--container-height: 260px;
+}
+.name__helpers {
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	background: #eee5e5;
+	max-height: var(--container-height);
+	border: 2px solid #37392e;
+	border-radius: 5px;
+	scroll-snap-type: y mandatory;
+	overscroll-behavior-y: contain;
+	overflow-x: hidden;
+	overflow-y: auto;
+	z-index: 1000;
+}
+
+.name__helpers li:hover {
+	background-color: var(--main-color);
+	cursor: pointer;
+}
+
+.animation {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 50px;
+	height: 100%;
+	background-size: 50px 40px;
+	/* background image on bottom of css for readability */
+}
+.name__helpers li {
+	padding: 20px;
+	border-top: 1px solid #ccc;
+	scroll-snap-align: start;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #28afb0;
+	border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #19647e;
+}
+
 .catalog__list {
 	padding: 0;
 	list-style: none;
@@ -1314,7 +1372,7 @@ a {
 }
 .footer__link:focus,
 .footer__link:hover {
-	border-color: #e02d71;
+	border-color: var(--main-color);
 }
 .footer__link--medium {
 	font-weight: 500;
@@ -1476,5 +1534,27 @@ a {
 
 	.form__select option {
 		width: 100px;
+	}
+}
+
+@media (max-width: 591px) {
+	.header__wrapper {
+		grid-template-columns: 1fr;
+		grid-column-gap: 5px;
+		justify-items: center;
+	}
+
+	.pagination {
+		flex-wrap: wrap;
+		padding-bottom: 20px;
+	}
+	.catalog__list {
+		grid-template-columns: repeat(1, 1fr);
+		grid-gap: var(--grid-gap);
+		margin: 0 0 70px;
+	}
+
+	.form__select option {
+		width: 50px;
 	}
 }

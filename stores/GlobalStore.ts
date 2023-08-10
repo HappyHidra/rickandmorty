@@ -1,10 +1,13 @@
 import { inject, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { defineStore } from 'pinia';
 
 export const useGlobalStore = defineStore('global-store', () => {
 	const route = useRoute();
 
 	let currentRoute = ref(route.query.page);
+	// for data that is not yet loaded
+	const charactersNames = null as CharInfo | null;
 
 	// watch(
 	// 	() => route.params,
@@ -15,6 +18,11 @@ export const useGlobalStore = defineStore('global-store', () => {
 
 	return {
 		// ...
+		charactersNames,
 		currentRoute,
 	};
+
+	interface CharInfo {
+		name: Array<string>;
+	}
 });

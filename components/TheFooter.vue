@@ -3,19 +3,7 @@
 		<div class="footer__wrapper">
 			<ul class="footer__links">
 				<li>
-					<a class="footer__link" href="#"> Каталог </a>
-				</li>
-				<li>
-					<a class="footer__link" href="tel:88006009009"> 8 800 600 90 09 </a>
-				</li>
-				<li>
-					<a class="footer__link" href="mailto:hi@technozavrrr.com"> hi@technozavrrr.com </a>
-				</li>
-				<li>
-					<a class="footer__link" href="#"> Распродажа </a>
-				</li>
-				<li>
-					<a class="footer__link footer__link--medium" href="#"> Заказать звонок </a>
+					<a class="footer__link" href="https://github.com/happyhidra"> GitHub </a>
 				</li>
 			</ul>
 
@@ -62,16 +50,16 @@
 				и&nbsp;смежных правах.
 			</p>
 
-			<ul class="footer__data">
+			<!-- <ul class="footer__data">
 				<li>
 					<a class="footer__link" href="#" target="_blank" rel="noopener" type="application/pdf"> Политика конфиденциальности </a>
 				</li>
 				<li>
 					<a class="footer__link" href="#" target="_blank" rel="noopener" type="application/pdf"> Публичная оферта </a>
 				</li>
-			</ul>
+			</ul> -->
 
-			<span class="footer__copyright"> © 2020 Moire </span>
+			<span class="footer__copyright"> © 2023 R&M </span>
 		</div>
 	</footer>
 </template>
