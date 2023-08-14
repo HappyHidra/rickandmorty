@@ -5,7 +5,7 @@
 				<span class="header__tel" aria-label="Количество товаров">Собери свою супер команду!</span>
 			</NuxtLink>
 			<NuxtLink to="/" class="header__logo">
-				<img src="@/img/site-logo.webp" alt="Логотип Рик и Морти" width="494" height="148" />
+				<img src="@/assets/site-logo.webp" alt="Логотип Рик и Морти" width="494" height="148" />
 			</NuxtLink>
 			<NuxtLink to="/cart" class="header__cart" aria-label="Корзина с товарами">
 				<svg width="40" height="40" viewBox="0 0 50 50" fill="515151">
