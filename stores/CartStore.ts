@@ -5,12 +5,13 @@ import { defineStore } from 'pinia';
 // function()s become actions
 
 export const useCartStore = defineStore('cart-store', () => {
-	const count = ref(0);
-	const name = ref('Eduardo');
-	const doubleCount = computed(() => count.value * 2);
-	function increment() {
-		count.value++;
+	const teamList = reactive([]);
+
+	const count = computed(() => teamList.length);
+
+	function addToTeam(member: string) {
+		teamList.push(member);
 	}
 
-	return { count, name, doubleCount, increment };
+	return { count, teamList, addToTeam };
 });

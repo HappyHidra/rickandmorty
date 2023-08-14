@@ -22,7 +22,8 @@
 		</div>
 		<!-- {{ smth }} -->
 		<section v-if="!itemLoading && !error">
-			<CharacterCard :data="data" v-model:text="smth" />
+			<!-- <CharacterCard :data="data" v-model:text="smth" /> -->
+			<CharacterCard :data="data" />
 		</section>
 	</main>
 </template>
@@ -44,7 +45,7 @@
 	const error: Ref<null | Object> = ref(null);
 
 	// v-model test
-	const smth = ref('Something here');
+	// const smth = ref('Something here');
 
 	const loadItem = async () => {
 		itemLoading.value = true;

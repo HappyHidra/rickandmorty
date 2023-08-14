@@ -6,9 +6,9 @@
 		<div class="character-card__ContentWrapper">
 			<h1 class="card__title">{{ props.data?.name }}</h1>
 			<span class="card__status">
-				<label class="colors__label">
+				<!-- <label class="colors__label">
 					<span class="colors__value" :style="{ background: status }"></span>
-				</label>
+				</label> -->
 				{{ props.data?.status }} - {{ props.data?.species }}
 			</span>
 			<ul class="character-cards list-reset">
@@ -20,8 +20,9 @@
 					<p class="cards-item__title">В первый раз замечен:</p>
 					<p class="cards-item__descr">{{ props.data?.location.name }}</p>
 				</li>
-				<input @input="emits('update:text', ($event.target as HTMLInputElement).value)" :value="text" />
+				<!-- <input @input="emits('update:text', ($event.target as HTMLInputElement).value)" :value="text" /> -->
 			</ul>
+			<button @click="addMember" class="button button--primary">Добавить в команду</button>
 		</div>
 	</article>
 	<div class="error-loader">
@@ -31,13 +32,16 @@
 
 <script setup lang="ts">
 	import { Data } from '@/types/data';
+	import { useCartStore } from '@/stores/CartStore';
 
 	interface Props {
 		data: Data | null;
-		text: string;
+		// text: string;
 	}
 
 	const props = defineProps<Props>();
+
+	const { addToTeam } = useCartStore();
 
 	const status = computed(() => {
 		return props.data?.status === 'Alive' ? 'green' : 'red';
@@ -46,4 +50,8 @@
 	const emits = defineEmits<{
 		(event: 'update:text', payload: string): void;
 	}>();
+
+	const addMember = () => {
+		addToTeam(props.data?.name);
+	};
 </script>
