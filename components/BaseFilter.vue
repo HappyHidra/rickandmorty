@@ -5,9 +5,9 @@
 		<fieldset class="form__block">
 			<legend class="form__legend">Имя</legend>
 			<label class="form__label">
-				<input @blur="status = false" @input="inputName" class="form__select" name="category" v-model="currentFilters.name" />
+				<input @input="inputName" class="form__select" name="category" v-model="currentFilters.name" />
 				<ul v-if="status" class="name__helpers">
-					<li @click.prevent="helperClick(helper)" v-for="helper of helpers" :key="helper">
+					<li @click="helperClick(helper)" v-for="helper of helpers" :key="helper">
 						{{ helper }}
 					</li>
 				</ul>
@@ -60,7 +60,10 @@
 	import { ref, reactive } from 'vue';
 
 	const props = defineProps({
-		helpers: Array<string>,
+		helpers: {
+			type: Array<string>,
+			required: true,
+		},
 	});
 
 	const currentFilters = reactive({

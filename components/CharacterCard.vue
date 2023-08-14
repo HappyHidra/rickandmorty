@@ -5,16 +5,26 @@
 		</div>
 		<div class="character-card__ContentWrapper">
 			<h1 class="card__title">{{ props.data?.name }}</h1>
-			<span class="card__status">
-				<!-- <label class="colors__label">
-					<span class="colors__value" :style="{ background: status }"></span>
-				</label> -->
-				{{ props.data?.status }} - {{ props.data?.species }}
-			</span>
 			<ul class="character-cards list-reset">
 				<li class="cards-item">
-					<p class="cards-item__title">В последний раз видели:</p>
-					<p class="cards-item__descr">{{ props.data?.location.name }}</p>
+					<p class="cards-item__title">Статус:</p>
+
+					<p class="cards-item__descr">
+						<span class="card__status">
+							<svg height="40" width="40">
+								<circle cx="20" cy="20" r="20" :fill="status" />
+							</svg>
+						</span>
+						<p class="card__status">{{ props.data?.status }}</p>
+					</p>
+				</li>
+				<li class="cards-item">
+					<p class="cards-item__title">Раса:</p>
+					<p class="cards-item__descr">{{ props.data?.species }}</p>
+				</li>
+				<li class="cards-item">
+					<p class="cards-item__title">Пол:</p>
+					<p class="cards-item__descr">{{ props.data?.gender }}</p>
 				</li>
 				<li class="cards-item">
 					<p class="cards-item__title">В первый раз замечен:</p>
@@ -22,7 +32,8 @@
 				</li>
 				<!-- <input @input="emits('update:text', ($event.target as HTMLInputElement).value)" :value="text" /> -->
 			</ul>
-			<button @click="addMember" class="button button--primary">Добавить в команду</button>
+			<button v-if="!existInTeam" @click="addMember" class="button button--primary">Добавить в команду</button>
+			<button v-else @click="removeMember" class="button button--primary">Убрать из команды</button>
 		</div>
 	</article>
 	<div class="error-loader">
@@ -35,23 +46,31 @@
 	import { useCartStore } from '@/stores/CartStore';
 
 	interface Props {
-		data: Data | null;
-		// text: string;
+		data: Data
 	}
 
 	const props = defineProps<Props>();
 
-	const { addToTeam } = useCartStore();
+	const { addToTeam, removeFromTeam, teamList } = useCartStore();
 
 	const status = computed(() => {
 		return props.data?.status === 'Alive' ? 'green' : 'red';
 	});
 
-	const emits = defineEmits<{
-		(event: 'update:text', payload: string): void;
-	}>();
+	// const emits = defineEmits<{
+	// 	(event: 'update:text', payload: string): void;
+	// }>();
+
+	const removeMember = () => {
+		removeFromTeam(props.data?.name);
+	};
+
 
 	const addMember = () => {
 		addToTeam(props.data?.name);
 	};
+
+	const existInTeam = computed(() => {
+		return teamList.findIndex((pers) => props.data?.name == pers) !== -1;
+	});
 </script>

@@ -22,7 +22,5 @@ export const useGlobalStore = defineStore('global-store', () => {
 		currentRoute,
 	};
 
-	interface CharInfo {
-		name: Array<string>;
-	}
+	type CharInfo = Array<string>;
 });

@@ -368,6 +368,15 @@ a {
 	color: rgb(158, 158, 158);
 }
 
+.cards-item__descr {
+	display: flex;
+	align-items: center;
+}
+
+.card__status {
+	padding-left: 10px;
+}
+
 .filter__form {
 	padding: 0 25px 60px;
 }
@@ -1535,6 +1544,10 @@ a {
 
 	.form__select option {
 		width: 100px;
+	}
+
+	.character-card {
+		flex-direction: column;
 	}
 }
 

@@ -45,7 +45,7 @@
 		<div v-else class="content__catalog">
 			<!-- Filter -->
 			<aside class="">
-				<BaseFilter @load-filtered-characters="addFilters" @clear-filters="removeFilters" @filter-by-name="filterByName" :helpers="helpers" />
+				<BaseFilter @load-filtered-characters="addFilters" @clear-filters="removeFilters" @filter-by-name="filterByName" :helpers="helpers!" />
 			</aside>
 			<!-- Catalog -->
 			<section class="catalog">
@@ -96,7 +96,7 @@
 	let items = ref();
 	const productsLoading = ref(false);
 
-	const helpers = ref([]);
+	const helpers = ref<Array<string> | undefined>([]);
 
 	interface ItemsResponse {
 		info: Object;
@@ -132,7 +132,7 @@
 		if (currentName.length < 1) {
 			helpers.value = [];
 		} else {
-			helpers.value = charactersNames.filter((name: string) => name.includes(currentName));
+			helpers.value = charactersNames?.filter((name: string) => name.includes(currentName));
 		}
 	};
 	// Items loader

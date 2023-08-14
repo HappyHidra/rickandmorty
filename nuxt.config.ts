@@ -2,9 +2,13 @@
 export default defineNuxtConfig({
 	app: {
 		baseURL: '/rickandmorty/', // baseURL: '/<repository>/'
+		buildAssetsDir: 'assets', // don't use "_" at the begining of the folder name to avoids nojkill conflict
 	},
+	generate: {
+		nojekyll: true, //not working on this version
+	},
+	ssr: true, //server side rendered enabled //When true
 	target: 'static',
-	ssr: false,
 	css: ['@/assets/css/style.css'],
 	devtools: { enabled: true },
 	modules: ['@pinia/nuxt'],

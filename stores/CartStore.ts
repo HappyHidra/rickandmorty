@@ -5,7 +5,7 @@ import { defineStore } from 'pinia';
 // function()s become actions
 
 export const useCartStore = defineStore('cart-store', () => {
-	const teamList = reactive([]);
+	const teamList: string[] = reactive([]);
 
 	const count = computed(() => teamList.length);
 
@@ -13,5 +13,10 @@ export const useCartStore = defineStore('cart-store', () => {
 		teamList.push(member);
 	}
 
-	return { count, teamList, addToTeam };
+	function removeFromTeam(member: string) {
+		const removeIndex = teamList.findIndex((pers) => member == pers);
+		teamList.splice(removeIndex, 1);
+	}
+
+	return { count, teamList, addToTeam, removeFromTeam };
 });
