@@ -1,6 +1,6 @@
 {
   "name": "Rick and Morty",
-  "homepage": "https://https://https://happyhidra.github.io/rickandmorty/",
+  "homepage": "https://happyhidra.github.io/rickandmorty/",
   "private": true,
   "scripts": {
     "build": "nuxt build",
