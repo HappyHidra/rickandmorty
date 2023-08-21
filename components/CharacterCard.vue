@@ -35,10 +35,11 @@
 			<button v-if="!existInTeam" @click="addMember" class="button button--primary">Добавить в команду</button>
 			<button v-else @click="removeMember" class="button button--primary">Убрать из команды</button>
 		</div>
-	</article>
-	<div class="error-loader">
+		<div class="error-loader">
 		<NuxtLink to="/" class="button button--primary mainpage__link"> На главную </NuxtLink>
 	</div>
+	</article>
+
 </template>
 
 <script setup lang="ts">
