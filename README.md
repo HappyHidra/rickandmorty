@@ -2,6 +2,9 @@ Rick and Morty catalog (Nuxt3 + Typescript. Pinia as state manager).
 Possibilities:
 Pagination, Search, Filtration, Add to cart.
 
+Check on gh-pages live: 
+https://happyhidra.github.io/rickandmorty/
+
 ## Setup
 npm install
 ## Development Server
